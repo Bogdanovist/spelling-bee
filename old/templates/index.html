@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Spelling Bee Training</title>
+</head>
+<body>
+    <h1>Spelling Bee Training</h1>
+    <form method="POST" action="/">
+        <label>Spell the word: {{ word }}</label><br>
+        <input type="text" name="result" required><br>
+        <input type="hidden" name="word" value="{{ word }}">
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
