@@ -16,34 +16,34 @@ def commit_sql(stmt):
 def record_guess(result):
 
     stmt = (
-        insert(Word).
-        values(word=word,
-            level = level).
-        returning(Word.word)
-    )
-    try:
-        word_id = commit_sql(stmt).first()[0]
-        #st.write(word_id)
-    except Exception as e:
-        st.exception(e)
-        st.error(f"word {word} already exists")
-        return
-
-    stmt = (
         insert(Question).
-        values(word_id=word_id, 
+        values(word_id=next_word, 
                result=result)
     )
     ret = commit_sql(stmt)
 
-    st.session_state['db_update'] = f"{word} {level} success!"
+    st.session_state['db_update'] = f"{next_word} success!"
+
+def get_next_word():
+   # can use state to speed this up...
+
+   word = pd.read_sql_table('word',engine)
+   qs = pd.read_sql_table('question',engine)
+   new_words = list(set(word.word).difference(set(qs.word_id)))
+
+   if len(new_words) == 0:
+       st.error("No more new words!")
+       st.stop()
+   else:
+       new_word = new_words[0]
+       st.write(f"{len(new_words)} words remaining")
+       return new_word
+       
 
 st.title('Spelling Bee Tester')
 
-with st.sidebar:
-    level = st.selectbox("Level selector", [1,2,3,4,5,6], index=0)
-
-word = st.text_input("word")
+next_word = get_next_word()
+word = st.header(next_word)
 
 correct = st.button("Correct", key='correct', help=None, on_click=record_guess, args=('correct',))
 tricky = st.button("Tricky", key='tricky', help=None, on_click=record_guess, args=('tricky',))
